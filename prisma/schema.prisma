@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique
+  createdAt   DateTime @default(now())
+  lastActiveAt DateTime @default(now())
+
+  onboarding   Onboarding?
+  triageResults TriageResult[]
+  recoveryPlans RecoveryPlan[]
+  taskProgress  TaskProgress[]
+
+  @@index([sessionId])
+}
+
+model Onboarding {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  exam          String
+  subjects      String[]
+  daysAbsent    Int
+  absenceReason String
+  stressLevel   Int
+  worryText     String   @default("")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model TriageResult {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  narrative String   @db.Text
+  subjects  String   @db.Text  // JSON stringified array of subject triage
+  quickWin  String   @db.Text  // JSON stringified quick win object
+  audioUrl  String?  @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model RecoveryPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mode      String   // "survival" | "thriving"
+  plan      String   @db.Text  // JSON stringified full plan
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, mode])
+  @@index([userId])
+}
+
+model TaskProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskId    String
+  dayIndex  Int
+  planMode  String
+  completed Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, taskId])
+  @@index([userId])
+  @@index([taskId])
+}
