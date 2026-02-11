@@ -2,6 +2,8 @@
 
 **AI-powered academic recovery for Indian students**
 
+![.](screenshots/landing.png)
+
 CatchUp AI helps students who've fallen behind due to illness, burnout, or personal issues get back on track with personalized triage analysis, empathetic AI guidance with voice support, and adaptive 14-day recovery plans.
 
 ---
